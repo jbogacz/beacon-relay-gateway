@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const users = [
-    { id: 1, name: 'Alice', active: true },
+    { id: 1, name: 'Philip', active: true },
     { id: 2, name: 'Bob', active: false },
     { id: 3, name: 'Charlie', active: true }
   ];
