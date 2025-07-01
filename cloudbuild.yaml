@@ -1,0 +1,28 @@
+# Simple cloudbuild.yaml - Just adds health check after deployment
+steps:
+  # Deploy the service (Cloud Run will handle Docker build automatically)
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'beacon-relay-gateway'
+      - '--source'
+      - '.'
+      - '--region'
+      - 'us-central1'
+      - '--allow-unauthenticated'
+
+  # Configure health check
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'services'
+      - 'update'
+      - 'beacon-relay-gateway'
+      - '--region'
+      - 'us-central1'
+      - '--health-check-path'
+      - '/api/health'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
