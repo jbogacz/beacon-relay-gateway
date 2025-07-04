@@ -103,13 +103,13 @@ export function createValidationMiddleware<T extends TSchema>(schema: T) {
 // Decorator for automatic validation
 export function withValidation<T extends TSchema>(schema: T) {
   return function <F extends Function, ThisType>(
-    target: any,
+    target: unknown,
     propertyName: string,
     descriptor: TypedPropertyDescriptor<F>
   ) {
     const method = descriptor.value;
 
-    descriptor.value = async function(this: ThisType, request: Request, ...args: any[]) {
+    descriptor.value = async function(this: ThisType, request: Request, ...args: unknown[]) {
       const validator = createValidationMiddleware(schema);
       const validation = await validator(request);
 
@@ -119,7 +119,7 @@ export function withValidation<T extends TSchema>(schema: T) {
 
       // Call original method with validated data
       return method?.call(this, request, validation.data, ...args);
-    } as any as F;
+    } as unknown as F;
 
     return descriptor;
   };

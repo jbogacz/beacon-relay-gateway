@@ -85,7 +85,11 @@ async function performHealthChecks(): Promise<{
   externalApi?: 'healthy' | 'unhealthy';
   dependencies?: 'healthy' | 'unhealthy';
 }> {
-  const checks: any = {};
+  const checks: {
+    database?: 'healthy' | 'unhealthy';
+    externalApi?: 'healthy' | 'unhealthy';
+    dependencies?: 'healthy' | 'unhealthy';
+  } = {};
 
   try {
     // Example: Database health check
