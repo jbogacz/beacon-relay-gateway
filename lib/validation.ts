@@ -10,7 +10,7 @@ const ajv = new Ajv({
   removeAdditional: false,
   useDefaults: true,
   coerceTypes: false,
-  verbose: true
+  verbose: true,
 });
 
 // Add format validators (uuid, date-time, etc.)
@@ -25,30 +25,29 @@ export interface ValidationResult<T> {
 }
 
 // Generic validation function
-export function validateSchema<T extends TSchema>(
-  schema: T,
-  data: unknown
-): ValidationResult<Static<T>> {
+export function validateSchema<T extends TSchema>(schema: T, data: unknown): ValidationResult<Static<T>> {
   const validate = ajv.compile(schema);
   const isValid = validate(data);
 
   if (isValid) {
     return {
       success: true,
-      data: data as Static<T>
+      data: data as Static<T>,
     };
   }
 
   return {
     success: false,
     errors: validate.errors || [],
-    errorMessage: ajv.errorsText(validate.errors)
+    errorMessage: ajv.errorsText(validate.errors),
   };
 }
 
 // Validation middleware for Next.js API routes
 export function createValidationMiddleware<T extends TSchema>(schema: T) {
-  return async (request: Request): Promise<{
+  return async (
+    request: Request
+  ): Promise<{
     isValid: boolean;
     data?: Static<T>;
     errorResponse?: NextResponse;
@@ -60,41 +59,46 @@ export function createValidationMiddleware<T extends TSchema>(schema: T) {
       if (result.success) {
         return {
           isValid: true,
-          data: result.data
+          data: result.data,
         };
       }
 
       // Create detailed error response
-      const errorResponse = NextResponse.json({
-        success: false,
-        error: 'Validation failed',
-        message: result.errorMessage,
-        validationErrors: result.errors?.map(error => ({
-          field: error.instancePath || error.schemaPath,
-          message: error.message || 'Validation error',
-          value: error.data,
-          constraint: error.keyword,
-          params: error.params
-        })),
-        processedAt: new Date().toISOString()
-      }, { status: 400 });
+      const errorResponse = NextResponse.json(
+        {
+          success: false,
+          error: 'Validation failed',
+          message: result.errorMessage,
+          validationErrors: result.errors?.map(error => ({
+            field: error.instancePath || error.schemaPath,
+            message: error.message || 'Validation error',
+            value: error.data,
+            constraint: error.keyword,
+            params: error.params,
+          })),
+          processedAt: new Date().toISOString(),
+        },
+        { status: 400 }
+      );
 
       return {
         isValid: false,
-        errorResponse
+        errorResponse,
       };
-
     } catch (error) {
-      const errorResponse = NextResponse.json({
-        success: false,
-        error: 'Invalid JSON payload',
-        message: error instanceof Error ? error.message : 'Failed to parse JSON',
-        processedAt: new Date().toISOString()
-      }, { status: 400 });
+      const errorResponse = NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid JSON payload',
+          message: error instanceof Error ? error.message : 'Failed to parse JSON',
+          processedAt: new Date().toISOString(),
+        },
+        { status: 400 }
+      );
 
       return {
         isValid: false,
-        errorResponse
+        errorResponse,
       };
     }
   };
@@ -109,7 +113,7 @@ export function withValidation<T extends TSchema>(schema: T) {
   ) {
     const method = descriptor.value;
 
-    descriptor.value = async function(this: ThisType, request: Request, ...args: any[]) {
+    descriptor.value = async function (this: ThisType, request: Request, ...args: any[]) {
       const validator = createValidationMiddleware(schema);
       const validation = await validator(request);
 
@@ -133,7 +137,7 @@ export function addCustomFormats() {
     validate: (uuid: string) => {
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       return uuidRegex.test(uuid);
-    }
+    },
   });
 
   // Add signal strength validation
@@ -142,7 +146,7 @@ export function addCustomFormats() {
     validate: (rssi: number) => {
       // RSSI values are typically between -100 and 0 dBm
       return rssi >= -120 && rssi <= 10;
-    }
+    },
   });
 
   // Add subject ID format
@@ -151,7 +155,7 @@ export function addCustomFormats() {
     validate: (subjectId: string) => {
       // Allow alphanumeric, underscores, hyphens
       return /^[a-zA-Z0-9_-]+$/.test(subjectId);
-    }
+    },
   });
 }
 
