@@ -55,5 +55,9 @@ export const openApiDocument = generator.generateDocument({
       url: 'http://localhost:3000',
       description: 'Local development server',
     },
+    {
+      url: 'https://beacon-relay-gateway-309564398478.europe-central2.run.app',
+      description: 'Cloud development server',
+    },
   ],
 })
