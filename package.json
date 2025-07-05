@@ -9,20 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.34.37",
-    "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1",
+    "@asteasolutions/zod-to-openapi": "^7.3.4",
     "eslint-config-prettier": "^10.1.5",
     "next": "15.3.4",
     "prettier": "^3.6.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "swagger-ui-react": "^5.26.0",
+    "zod": "^3.25.74"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/swagger-ui-react": "^5.18.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
     "typescript": "^5"

@@ -1,107 +1,105 @@
-import { Type, Static } from '@sinclair/typebox';
+import { z } from 'zod'
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi'
 
-// Beacon data schema
-export const BeaconDataSchema = Type.Object({
-  major: Type.Integer({
-    minimum: 0,
-    maximum: 65535,
-    description: 'Beacon major identifier (0-65535)'
-  }),
-  minor: Type.Integer({
-    minimum: 0,
-    maximum: 65535,
-    description: 'Beacon minor identifier (0-65535)'
-  }),
-  signalStrength: Type.Number({
-    description: 'Signal strength in dBm (typically negative)'
-  }),
-  timestamp: Type.String({
-    format: 'date-time',
-    description: 'ISO 8601 timestamp when beacon was detected'
-  }),
-  uuid: Type.String({
-    format: 'uuid',
-    description: 'Beacon UUID in standard format'
+extendZodWithOpenApi(z)
+
+export const BeaconDataSchema = z
+  .object({
+    major: z.number().int().min(0).max(65535).openapi({
+      description: 'Beacon major identifier (0–65535)',
+      example: 1234,
+    }),
+    minor: z.number().int().min(0).max(65535).openapi({
+      description: 'Beacon minor identifier (0–65535)',
+      example: 5678,
+    }),
+    signalStrength: z.number().openapi({
+      description: 'Signal strength in dBm (typically negative)',
+      example: -78,
+    }),
+    timestamp: z.string().datetime().openapi({
+      description: 'Timestamp when beacon was detected (ISO 8601)',
+      example: '2025-07-04T12:00:00Z',
+    }),
+    uuid: z.string().uuid().openapi({
+      description: 'Beacon UUID in standard format',
+      example: 'e2c56db5-dffb-48d2-b060-d0f5a71096e0',
+    }),
   })
-});
+  .openapi({ title: 'BeaconData' })
 
-// Beacon event schema
-export const BeaconEventSchema = Type.Object({
-  timestamp: Type.String({
-    format: 'date-time',
-    description: 'ISO 8601 timestamp when event occurred'
-  }),
-  subjectId: Type.String({
-    minLength: 1,
-    description: 'Identifier for the subject (user, device, etc.)'
-  }),
-  id: Type.String({
-    minLength: 1,
-    description: 'Unique identifier for this event'
-  }),
-  beacon: BeaconDataSchema,
-  type: Type.Union([
-    Type.Literal('ENTER'),
-    Type.Literal('EXIT'),
-  ], {
-    description: 'Type of beacon event'
+export const BeaconEventSchema = z
+  .object({
+    timestamp: z.string().datetime().openapi({
+      description: 'Timestamp of the event (ISO 8601)',
+      example: '2025-07-04T12:00:00Z',
+    }),
+    subjectId: z.string().min(1).openapi({
+      description: 'Identifier for the subject (user, device, etc.)',
+      example: 'user-123',
+    }),
+    id: z.string().min(1).openapi({
+      description: 'Unique identifier for this event',
+      example: 'event-abc',
+    }),
+    beacon: BeaconDataSchema,
+    type: z.enum(['ENTER', 'EXIT']).openapi({
+      description: 'Type of beacon event',
+      example: 'ENTER',
+    }),
   })
-});
+  .openapi({ title: 'BeaconEvent' })
 
-// Response schemas
-export const BeaconEventResponseSchema = Type.Object({
-  success: Type.Boolean(),
-  eventId: Type.Optional(Type.String()),
-  message: Type.Optional(Type.String()),
-  processedAt: Type.String({ format: 'date-time' }),
-  data: Type.Optional(Type.Object({
-    subjectId: Type.String(),
-    beaconUuid: Type.String(),
-    eventType: Type.String(),
-    signalStrength: Type.Number(),
-    major: Type.Integer(),
-    minor: Type.Integer()
-  })),
-  error: Type.Optional(Type.String())
-});
+export const BeaconEventResponseSchema = z
+  .object({
+    success: z.boolean().openapi({ example: true }),
+    eventId: z.string().optional().openapi({
+      description: 'ID of the processed event',
+      example: 'event-abc',
+    }),
+    message: z.string().optional().openapi({
+      description: 'Optional message about the result',
+      example: 'Event successfully processed',
+    }),
+    processedAt: z.string().datetime().openapi({
+      description: 'Timestamp when the event was processed',
+      example: '2025-07-04T12:01:00Z',
+    }),
+    data: z
+      .object({
+        subjectId: z.string().openapi({ example: 'user-123' }),
+        beaconUuid: z.string().openapi({ example: 'e2c56db5-dffb-48d2-b060-d0f5a71096e0' }),
+        eventType: z.string().openapi({ example: 'ENTER' }),
+        signalStrength: z.number().openapi({ example: -78 }),
+        major: z.number().int().openapi({ example: 1234 }),
+        minor: z.number().int().openapi({ example: 5678 }),
+      })
+      .optional()
+      .openapi({ description: 'Event metadata if successful' }),
+    error: z.string().optional().openapi({
+      description: 'Error message if the request failed',
+    }),
+  })
+  .openapi({ title: 'BeaconEventResponse' })
 
-export const ValidationErrorSchema = Type.Object({
-  success: Type.Literal(false),
-  error: Type.String(),
-  processedAt: Type.String({ format: 'date-time' }),
-  validationErrors: Type.Optional(Type.Array(Type.Object({
-    instancePath: Type.String(),
-    schemaPath: Type.String(),
-    keyword: Type.String(),
-    params: Type.Record(Type.String(), Type.Any()),
-    message: Type.Optional(Type.String())
-  })))
-});
-
-// TypeScript types derived from schemas
-export type BeaconData = Static<typeof BeaconDataSchema>;
-export type BeaconEvent = Static<typeof BeaconEventSchema>;
-export type BeaconEventResponse = Static<typeof BeaconEventResponseSchema>;
-export type ValidationError = Static<typeof ValidationErrorSchema>;
-
-// Schema metadata for documentation
-export const BeaconEventSchemaMetadata = {
-  title: 'Beacon Event',
-  description: 'Schema for beacon proximity events (ENTER, EXIT)',
-  version: '1.0.0',
-  examples: [
-    {
-      timestamp: '2025-06-28T06:40:05.703Z',
-      subjectId: 'default_subject',
-      id: '1',
-      beacon: {
-        major: 666,
-        minor: 0,
-        signalStrength: -87,
-        timestamp: '2025-06-28T06:40:05.702Z',
-        uuid: 'e2c56db5-dffb-48d2-b060-d0f5a71096e0'
-      },
-      type: 'ENTER'
-    }
-  ]
-};
+export const ValidationErrorSchema = z
+  .object({
+    success: z.literal(false).openapi({ example: false }),
+    error: z.string().openapi({ description: 'Error summary' }),
+    processedAt: z.string().datetime().openapi({
+      description: 'Timestamp of the failed processing',
+    }),
+    validationErrors: z
+      .array(
+        z.object({
+          instancePath: z.string(),
+          schemaPath: z.string(),
+          keyword: z.string(),
+          params: z.record(z.string(), z.any()),
+          message: z.string().optional(),
+        })
+      )
+      .optional()
+      .openapi({ description: 'Detailed validation errors (if any)' }),
+  })
+  .openapi({ title: 'ValidationError' })
