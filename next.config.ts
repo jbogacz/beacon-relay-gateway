@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -9,6 +10,10 @@ const nextConfig: NextConfig = {
       fs: false,
       path: false,
     };
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@': path.resolve(__dirname, '.'),
+    }
 
     return config;
   },
