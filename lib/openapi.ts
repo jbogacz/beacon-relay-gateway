@@ -18,7 +18,7 @@ registry.register('BeaconEventResponse', BeaconEventResponseSchema)
 // Declare your API path
 registry.registerPath({
   method: 'post',
-  path: '/api/beacon',
+  path: '/api/beacon-events',
   summary: 'Create or record a beacon event',
   tags: ['Beacon'],
   request: {
