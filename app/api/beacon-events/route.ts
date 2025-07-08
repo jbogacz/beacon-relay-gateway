@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { BeaconEventSchema } from '@/schemas/beacon';
 import { validateRequest } from '@/lib/api-utils';
 import { withErrorHandling } from '@/lib/middleware';
+import { pubSubService } from '@/services/PubSubService';
+import { pubSubConfig } from '@/lib/config';
+import { z } from 'zod';
 
 interface BeaconEventResponse {
   eventId: string;
@@ -23,8 +26,21 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   // Generate a unique event ID (in a real app, this would likely come from a database)
   const eventId = `evt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-  // Process the beacon event (in a real app, you'd have business logic here)
-  // Example: await beaconService.processEvent(data)
+  // Initialize PubSub service if not already done
+  // In production, you would do this during app startup, not per request
+  if (!pubSubService.isReady()) {
+    pubSubService.initialize(pubSubConfig);
+  }
+
+  // Publish the event to the messaging system
+  try {
+    const messageId = await pubSubService.publishEvent(data);
+    console.log(`Event published successfully with message ID: ${messageId}`);
+  } catch (error) {
+    console.error('Failed to publish event:', error);
+    // We continue processing even if publishing fails
+    // In a real application, you might want to implement retries or a dead letter queue
+  }
 
   // Create a structured response
   const response: BeaconEventResponse = {
