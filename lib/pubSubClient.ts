@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { BeaconEventSchema } from '@/schemas/beacon';
+import { PubSub } from '@google-cloud/pubsub';
 
 // Define types from schemas
 type BeaconEvent = z.infer<typeof BeaconEventSchema>;
@@ -17,6 +18,7 @@ export class PubSubService {
   // Configuration
   private projectId?: string;
   private topicName?: string;
+  private client?: PubSub;
 
   private constructor() {
     // Private constructor for singleton pattern
@@ -46,8 +48,11 @@ export class PubSubService {
     this.projectId = config.projectId;
     this.topicName = config.topicName;
 
-    // In a real implementation, this would set up the client
-    // e.g., this.client = new PubSubClient(config)
+    if (!this.isInitialized) {
+      this.client = new PubSub({
+        projectId: this.projectId,
+      });
+    }
 
     const mode = config.disablePublishing ? '(DISABLED MODE)' : '(ACTIVE MODE)';
     console.log(`PubSubService initialized ${mode} with project ${this.projectId} and topic ${this.topicName}`);
@@ -66,25 +71,9 @@ export class PubSubService {
     try {
       console.log(`Publishing ${event.type} event for subject ${event.subjectId} with beacon ${event.beacon.uuid}`);
 
-      // In a real implementation, this would publish to the actual service
-      // e.g., return await this.client.publish(this.topicName, event)
-
-      // For now, just log and return a mock message ID
-      const messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-      // Log beacon details
-      console.log({
-        messageId,
-        eventType: event.type,
-        subjectId: event.subjectId,
-        beaconId: {
-          uuid: event.beacon.uuid,
-          major: event.beacon.major,
-          minor: event.beacon.minor,
-        },
-        signalStrength: event.beacon.signalStrength,
-        timestamp: event.timestamp,
-      });
+      const dataBuffer = Buffer.from(JSON.stringify(event));
+      const messageId = await this.client!.topic(this.topicName!).publish(dataBuffer);
+      console.log(`Event published successfully with message ID: ${messageId}`);
 
       return messageId;
     } catch (error) {

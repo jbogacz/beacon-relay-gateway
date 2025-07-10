@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withErrorHandling } from '@/lib/middleware';
-import { safeParseJson } from '@/lib/api-utils';
+import { safeParseJson, withErrorHandling } from '@/lib/apiHandler';
 import { z } from 'zod';
 import { NotFoundError, ForbiddenError, RateLimitError } from '@/lib/errors';
 

@@ -135,3 +135,22 @@ export function createSuccessResponse<T>(data?: T, message?: string): NextRespon
 
   return NextResponse.json(response);
 }
+
+/**
+ * API Middleware function that can be used to wrap API route handlers
+ * for consistent error handling and logging
+ */
+export function withErrorHandling(handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) {
+  return async function (req: NextRequest): Promise<NextResponse> {
+    try {
+      // Add request logging if needed
+      // console.log(`${req.method} ${req.url}`)
+
+      // Call the original handler
+      return await handler(req);
+    } catch (error) {
+      // Use the centralized error handler
+      return handleApiError(error);
+    }
+  };
+}

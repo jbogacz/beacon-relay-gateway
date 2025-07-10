@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BeaconEventSchema } from '@/schemas/beacon';
-import { validateRequest } from '@/lib/api-utils';
-import { withErrorHandling } from '@/lib/middleware';
-import { pubSubService } from '@/services/PubSubService';
+import { validateRequest, withErrorHandling } from '@/lib/apiHandler';
+import { pubSubService } from '@/lib/pubSubClient';
 import { pubSubConfig } from '@/lib/config';
-import { z } from 'zod';
 
 interface BeaconEventResponse {
   eventId: string;

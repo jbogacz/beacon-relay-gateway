@@ -6,8 +6,8 @@
  * PubSub service configuration
  */
 export const pubSubConfig = {
-  projectId: process.env.PUBSUB_PROJECT_ID || 'beacon-relay-project',
-  topicName: process.env.PUBSUB_TOPIC_NAME || 'beacon-events',
+  projectId: process.env.PUBSUB_PROJECT_ID || 'beacon-relay',
+  topicName: process.env.PUBSUB_TOPIC_NAME || 'dev.beacons.presence.entered',
 
   // Set to true to disable publishing to PubSub (for local development)
   disablePublishing: process.env.DISABLE_PUBSUB === 'true',
