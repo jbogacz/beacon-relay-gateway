@@ -3,6 +3,7 @@ import { extendZodWithOpenApi, OpenAPIRegistry, OpenApiGeneratorV3 } from '@aste
 import {
   BeaconEventSchema,
   BeaconEventResponseSchema,
+  ValidationErrorSchema
 } from '@/schemas'
 
 // Monkey-patch Zod to support `.openapi()` metadata
@@ -31,7 +32,7 @@ registry.registerPath({
     },
   },
   responses: {
-    200: {
+    201: {
       description: 'Beacon event response',
       content: {
         'application/json': {
@@ -39,6 +40,14 @@ registry.registerPath({
         },
       },
     },
+    400: {
+      description: 'Validation error',
+      content: {
+        'application/json': {
+          schema: ValidationErrorSchema,
+        },
+      },
+    }
   },
 })
 

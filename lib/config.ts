@@ -5,7 +5,7 @@
 /**
  * PubSub service configuration
  */
-export const pubSubConfig = {
+export const pubSubConfig: PubSubConfig = {
   projectId: process.env.PUBSUB_PROJECT_ID || 'beacon-relay',
   topicName: process.env.PUBSUB_TOPIC_NAME || 'dev.beacons.presence.entered',
 
@@ -16,7 +16,7 @@ export const pubSubConfig = {
 /**
  * General application configuration
  */
-export const appConfig = {
+export const appConfig: AppConfig = {
   environment: process.env.NODE_ENV || 'development',
   apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:3000',
 
